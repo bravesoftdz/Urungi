@@ -745,12 +745,13 @@ app.controller('report_v2Ctrl', function ($scope, connection, $compile, queryMod
         // ...
     };
 
-
+    $scope.filterChangedTimeoutId = null;
     $scope.filterChanged = function(elementID,values)
     {
-
-       $scope.processStructure();
-
+        clearTimeout($scope.filterChangedTimeoutId);
+        $scope.filterChangedTimeoutId = setTimeout(function () {
+            $scope.processStructure();
+        }, 500);
     }
 
     $scope.remove = function(object,type)
