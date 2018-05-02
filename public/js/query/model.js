@@ -300,83 +300,57 @@ app.service('queryModel' , function ($http, $q, $filter, connection, $compile, $
         processStructure();
     }
 
-    this.getQueryData = function( done) {
-        getQueryData(done);
+    this.getQueryData = function() {
+        getQueryData();
     }
 
-    this.getQueryData = function(queryObject, done) {
+    this.getQueryData = function(queryObject) {
         query = queryObject;
-        getQueryData(done);
+        return getQueryData();
     }
 
 
-    function getQueryData(done)
-    {
-            var params = {};
-            cleanQuery(query);
-            wrongFilters = [];
-            checkFilters(query.groupFilters);
-
-            if (wrongFilters.length == 0)
-                    {
-                        params.query = angular.copy(query);
-
-                        connection.get('/api/reports/get-data', params, function(data) {
-                           var sql = data.sql;
-
-                            if (data.result == 0)
-                            {
-                                noty({text: data.msg,  timeout: 2000, type: 'error'});
-                                done([],sql,query);
-                            } else {
-                                prepareData(query,data.data, function(result)
-                                {
-                                    done(result,sql,query);
-                                });
-                            }
-
-
-                        });
-                    } else {
-
-                        done([],'',query);
-                    }
+    function getQueryData() {
+        return getQueryDataNextPage(1);
     };
 
-    this.getQueryDataNextPage = function(page, done) {
-        getQueryDataNextPage(page,done);
+    this.getQueryDataNextPage = function(page) {
+        return getQueryDataNextPage(page);
     }
 
-    function getQueryDataNextPage(page, done)
+    function getQueryDataNextPage(page)
     {
-        var params = {};
+        return new Promise((resolve, reject) => {
+            var params = {};
             wrongFilters = [];
             checkFilters(query.groupFilters);
 
-            if (wrongFilters.length == 0)
-                    {
-                        params.query = angular.copy(query);
-                        cleanQuery(params.query);
-                        params.page = page;
+            if (wrongFilters.length > 0) {
+                return reject(new Error('Some filters are wrong'));
+            }
 
-                        connection.get('/api/reports/get-data', params, function(data) {
-                           var sql = data.sql;
-                            if (data.result == 0)
-                            {
-                                noty({text: data.msg,  timeout: 2000, type: 'error'});
-                                done([],sql,query);
-                            } else {
-                                prepareData(query,data.data, function(result)
-                                {
-                                    done(result,sql,query);
-                                });
+            params.query = angular.copy(query);
+            cleanQuery(params.query);
+            params.page = page;
 
+            connection.get('/api/reports/get-data', params, function(data) {
+                if (data.result == 0) {
+                    return reject(new Error(data.msg));
+                }
 
-                            }
-                        });
-                    } else {
-                        done([],'',query);
-                    }
+                prepareData(data.data).then(result => {
+                    resolve({
+                        data: result,
+                        sql: data.sql,
+                        query: query,
+                        time: data.time,
+                    });
+                });
+            });
+        }).catch(err => {
+            noty({text: err.message,  timeout: 2000, type: 'error'});
+            throw err;
+        });
     }
 
     function cleanQuery(theQuery)
@@ -411,8 +385,7 @@ app.service('queryModel' , function ($http, $q, $filter, connection, $compile, $
         });
     }
 
-    function prepareData(query,data,done)
-    {
+    function prepareData(data) {
         var dateTimeReviver = function (key, value) {
             var a;
             if (typeof value === 'string') {
@@ -424,8 +397,9 @@ app.service('queryModel' , function ($http, $q, $filter, connection, $compile, $
             return value;
         }
 
-        if (data != undefined)
-            done(JSON.parse(JSON.stringify(data),dateTimeReviver));
+        return Promise.resolve(data).then(data => {
+            return JSON.parse(JSON.stringify(data), dateTimeReviver);
+        });
     }
 
     this.getDistinct = function($scope,attribute,done) {
