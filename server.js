@@ -11,6 +11,7 @@ var passport = require("passport");
 //var mongoose = require('mongoose');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session); //npm install connect-redis --- to store variable sessions
+var redis = require('redis');
 var cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session');
 
@@ -26,7 +27,8 @@ app.use(express.static(path.join(__dirname, 'bower_components')));
 
 app.use(cookieParser());
 app.use(cookieSession({key:"widestage", secret:"HEWÑÑasdfwejñlkjqwernnkkk13134134wer", httpOnly: true, secure: false, cookie: {maxAge: 60 * 60 * 1000}}));
-app.use(session({secret: 'ndwidestagev0', cookie: {httpOnly: true, secure: false}, store: new RedisStore({maxAge: 60 * 60 * 1000}), resave: false, saveUninitialized: true}));
+global.redisClient = redis.createClient();
+app.use(session({secret: 'ndwidestagev0', cookie: {httpOnly: true, secure: false}, store: new RedisStore({client: redisClient, maxAge: 60 * 60 * 1000}), resave: false, saveUninitialized: true}));
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json({limit: '50mb'})); // get information from html forms
@@ -49,7 +51,7 @@ if (authentication)
     app.use(passport.authenticate('remember-me'));
 }
 
-if (cluster.isMaster) {
+if (cluster.isMaster && process.env.NODE_ENV !== 'test') {
     var numCPUs = require('os').cpus().length;
 
     // Fork workers.
@@ -89,7 +91,12 @@ if (cluster.isMaster) {
     var ipaddr  = process.env.IP || config.get('ip');
     var port    = process.env.PORT || config.get('port');
 
-    app.listen(port, ipaddr);
+    if (process.env.NODE_ENV !== 'test') {
+        app.listen(port, ipaddr);
 
-    console.log("Server running at http://" + ipaddr + ":" + port + "/ in worker "+cluster.worker.id);
+        console.log("Server running at http://" + ipaddr + ":" + port + "/");
+    }
+
 }
+
+module.exports = app
