@@ -199,10 +199,26 @@ this.rebuildChart = function(report)
                                 },
                                  size: {
                                     height:chart.height
-                                 }
+                                 },
+                
+
+                                 padding: {
+                                         top: 100
+                                        },
+                                 legend: {
+                                    position: 'inset',
+
+                                    inset: {
+                                        anchor: 'top-left',
+                                         x: 10,
+                                         y: -100,
+                                        step: undefined
+                                    }
+                                }
+
                             });
-                        }
-                }
+                            }
+                          }
             chart.chartCanvas = chartCanvas;
 
         }
