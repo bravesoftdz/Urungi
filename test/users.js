@@ -67,7 +67,7 @@ describe ('get /api/admin/users/find-all',function(){
 	})
 })
 describe ('get /api/admin/users/find-one',function(){
-	it ('should return status 200',function(){
+	it ('should return status 200 1',function(){
 		return agent.post('/api/login')
                 .send({ userName: 'administrator', password: 'widestage' })
                 .then(res => {
@@ -87,7 +87,7 @@ describe ('get /api/admin/users/find-one',function(){
                     })
                 })
 
-	it ('should return status 200',function(){
+	it ('should return status 200 2',function(){
 		return agent.post('/api/login')
                 .send({ userName: 'administrator', password: 'widestage' })
                 .then(res => {
@@ -99,8 +99,26 @@ describe ('get /api/admin/users/find-one',function(){
                     		expect(res).to.have.status(200);
                     		console.log(decrypt(res.text));
                     		var decrypted = decrypt(res.text);
-                        		expect(decrypted).to.have.property('result',0);
-                        		expect(decrypted).to.have.property('msg');
+                        		expect(decrypted).to.have.property('result',1);
+                        		expect(decrypted).to.have.property('item');
+                        		expect(decrypted.item).to.have.property('_id');
+                        		expect(decrypted.item).to.have.property('userName');
+                        		expect(decrypted.item).to.have.property('companyID');
+                        		expect(decrypted.item).to.have.property('status');
+                        		expect(decrypted.item).to.have.property('nd_trash_deleted');
+                        		expect(decrypted.item).to.have.property('__v');
+                        		expect(decrypted.item).to.have.property('last_login_date');
+                        		expect(decrypted.item).to.have.property('last_login_ip').to.be.an.ip;
+                        		expect(decrypted.item).to.have.property('privateSpace');
+                        		expect(decrypted.item).to.have.property('startDate');
+                        		expect(decrypted.item).to.have.property('dialogs');
+                        		expect(decrypted.item).to.have.property('contextHelp');
+                        		expect(decrypted.item).to.have.property('filters');
+                        		expect(decrypted.item).to.have.property('roles').to.be.a('array').to.include('WSTADMIN');
+
+
+
+
                     });
                	})
             })
