@@ -2,11 +2,10 @@ process.env.NODE_ENV = 'test';
 
 const mongoose = require("mongoose");
 
-//Require the dev-dependencies
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../server');
-const should = chai.should();
+const expect = chai.expect;
 const assert = chai.assert;
 
 chai.use(chaiHttp);
@@ -30,7 +29,7 @@ describe('POST /api/login', () => {
             return chai.request(server).post('/api/login')
                 .send({ userName: 'administrator', password: 'invalidpassword' })
                 .then(res => {
-                    res.should.have.status(401);
+                    expect(res).to.have.status(401);
                 })
         });
     });
@@ -39,12 +38,13 @@ describe('POST /api/login', () => {
             return chai.request(server).post('/api/login')
                 .send({ userName: 'administrator', password: 'widestage' })
                 .then(res => {
-                    res.body.should.be.a('object');
-                    res.body.should.have.property('user');
-                    res.body.user.should.be.a('object');
-                    res.body.user.should.have.property('roles');
-                    res.body.user.roles.should.be.a('array');
-                    res.body.user.roles.should.include('WSTADMIN');
+                    expect(res).to.have.status(200);
+                    expect(res.body).to.be.a('object');
+                    expect(res.body).to.have.property('user');
+                    expect(res.body.user).to.be.a('object');
+                    expect(res.body.user).to.have.property('roles');
+                    expect(res.body.user.roles).to.be.a('array');
+                    expect(res.body.user.roles).to.include('WSTADMIN');
                 });
         });
     });
