@@ -37,14 +37,14 @@ describe ('get /api/admin/users/find-all',function(){
                     return agent.get('/api/admin/users/find-all')
                			.then(res => {
                     	expect(res).to.have.status(200);
-                    	//console.log(decrypt(res.text));
+                    	console.log(decrypt(res.text));
                     	var decrypted = decrypt(res.text);
                     	expect (decrypted).to.be.a('object');
                     	expect(decrypted).to.have.property('result');
                     	expect(decrypted).to.have.property('page');
                     	expect(decrypted).to.have.property('pages');
                     	expect(decrypted.items).to.be.a('array');
-                    	expect(decrypted.items).to.have.lengthOf(1);
+                    	expect(decrypted.items);
                     	expect(decrypted.items[0]).to.have.property('_id');
                     	expect(decrypted.items[0]).to.have.property('userName','administrator');
                     	expect(decrypted.items[0]).to.have.property('companyID','COMPID');
@@ -93,11 +93,11 @@ describe ('get /api/admin/users/find-one',function(){
                 .then(res => {
                     expect(res).to.have.status(200);
                     return Users.findOne({userName : 'administrator'}).then(function(User){
-                    	console.log(User.id);
+                    	//console.log(User.id);
  						return agent.get('/api/admin/users/find-one').query({id : User.id})
                				.then(res => {
                     		expect(res).to.have.status(200);
-                    		console.log(decrypt(res.text));
+                    		//console.log(decrypt(res.text));
                     		var decrypted = decrypt(res.text);
                         		expect(decrypted).to.have.property('result',1);
                         		expect(decrypted).to.have.property('item');
@@ -119,10 +119,64 @@ describe ('get /api/admin/users/find-one',function(){
 
 
 
-                    });
+                    })
                	})
             })
         })
+describe ('post /api/admin/users/create',function(){
+	it ('should return status 200 ',function(){
+		return agent.post('/api/login')
+                .send({ userName: 'administrator', password: 'widestage' })
+                .then(res => {
+                	expect(res).to.have.status(200);
+               			return agent.post('/api/admin/users/create')
+               				.send({ userName : 'test' , pwd1 : 'testPassword'})
+               				.then(res => {
+                    			expect(res).to.have.status(200);
+                    			//console.log(decrypt(res.text));
+                    			var decrypted = decrypt(res.text);
+                        		expect(decrypted).to.have.property('result',1);
+                        		expect(decrypted).to.have.property('msg','User created.');
+                        		expect(decrypted).to.have.property('user');
+                        		expect(decrypted.user).to.have.property('__v');
+                        		expect(decrypted.user).to.have.property('userName');
+                        		expect(decrypted.user).to.have.property('companyID');
+                        		expect(decrypted.user).to.have.property('status');
+                        		expect(decrypted.user).to.have.property('nd_trash_deleted');
+                        		expect(decrypted.user).to.have.property('salt');
+                        		expect(decrypted.user).to.have.property('hash');
+                        		expect(decrypted.user).to.have.property('_id');
+                        		expect(decrypted.user).to.have.property('privateSpace');
+                        		expect(decrypted.user).to.have.property('startDate');
+                        		expect(decrypted.user).to.have.property('dialogs');
+                        		expect(decrypted.user).to.have.property('contextHelp');
+                        		expect(decrypted.user).to.have.property('filters');
+                        		expect(decrypted.user).to.have.property('roles');
+                    			return Users.deleteOne({userName: 'test'});
+                    		})
+                 })
+    })
+		    		
+})
+    	
+describe ('post /api/admin/users/update/5afec7c6932ee02352204146',function(){
+	it ('should return status 200 ',function(){
+		return agent.post('/api/login')
+                .send({ userName: 'update', password: 'password' })
+                .then(res => {
+                	expect(res).to.have.status(200);	
+                		return agent.post( '/api/admin/users/update/5afec7c6932ee02352204146')
+                			.send({})
+                			.then(res =>{
+                				expect(res).to.have.status(200);
+                				console.log(decrypt(res.text));
+                			})
+
+                })
+    })
+		    		
+})
+
 
                    
 
