@@ -130,7 +130,7 @@ describe ('post /api/admin/users/create',function(){
                 .then(res => {
                 	expect(res).to.have.status(200);
                			return agent.post('/api/admin/users/create')
-               				.send({ userName : 'test' , pwd1 : 'testPassword'})
+               				.send({ userName : 'administrator' , pwd1 : 'widestage'})
                				.then(res => {
                     			expect(res).to.have.status(200);
                     			//console.log(decrypt(res.text));
@@ -152,32 +152,74 @@ describe ('post /api/admin/users/create',function(){
                         		expect(decrypted.user).to.have.property('contextHelp');
                         		expect(decrypted.user).to.have.property('filters');
                         		expect(decrypted.user).to.have.property('roles');
-                    			return Users.deleteOne({userName: 'test'});
+                    			//return Users.deleteOne({userName: 'test'});
                     		})
                  })
     })
 		    		
 })
     	
-describe ('post /api/admin/users/update/5afec7c6932ee02352204146',function(){
+describe ('post /api/admin/users/update/:id',function(){
 	it ('should return status 200 ',function(){
 		return agent.post('/api/login')
-                .send({ userName: 'update', password: 'password' })
+                .send({ userName: 'administrator', password: 'widestage' })
                 .then(res => {
-                	expect(res).to.have.status(200);	
-                		return agent.post( '/api/admin/users/update/5afec7c6932ee02352204146')
-                			.send({})
-                			.then(res =>{
-                				expect(res).to.have.status(200);
+                	return Users.findOne({userName : 'administrator'}).then(function(User){
+               
+                	   			expect(res).to.have.status(200);	
+                				return agent.post( '/api/admin/users/update/'+User.id)
+                				.send({email : 'admin@example.com' , _id : User.id, fname : 'update'})
+		                			.then(res =>{
+		                				expect(res).to.have.status(200);
                 				console.log(decrypt(res.text));
+                				var decrypted = decrypt(res.text);
+                				expect(decrypted).to.have.property('result',1);
+                				expect(decrypted).to.have.property('msg','1 record updated.');
                 			})
 
+               		})
+   				})
+	})    		
+})
+/*
+describe ('post /api/admin/users/delete/:id',function(){
+	it ('should return status 200 ',function(){
+		return agent.post('/api/login')
+                .send({ userName: 'administrator', password: 'widestage' })
+                .then(res => {
+                	return Users.findOne({userName : 'administrator'}).then(function(User){
+               
+                	   			expect(res).to.have.status(200);	
+                				return agent.post( '/api/admin/users/delete/'+User.id)
+                					.send({_id : User.id})
+		                			.then(res =>{
+		                	        	expect(res).to.have.status(200);
+		                	        	console.log(decrypt(res.text));
+                					
+                				})
+                				
+                	})
+    			})
+    })
+})
+*/
+/*
+describe ('post /api/admin/users/change-user-status',function(){
+	it ('should return status 200 ',function(){
+		return agent.post('/api/login')
+                .send({ userName: 'administrator', password: 'widestage' })
+                .then(res => {
+                	return Users.findOne({userName : 'administrator'}).then(function(User){
+               
+                	return agent.post('/api/admin/users/change-user-status').query({_id : User.id})
+                		.then(res =>{
+		                			console.log(decrypt(res.text));
+    					})
+                	})
                 })
     })
-		    		
 })
-
-
+*/
                    
 
 function decrypt(data){

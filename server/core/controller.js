@@ -210,12 +210,13 @@ Controller.method('update', function (req, done) {
         user_companyName : (req.isAuthenticated()) ? req.user.companyName : null
     });
 
+
     //this.model.update({"_id" : id}, {$set: data }, function (err, numAffected) {
+
     this.model.update(find, {$set: data }, function (err, result) {
         if(err) throw err;
 
         var numAffected = (typeof result.n == 'undefined') ? result.nModified : result.n; //MongoDB 2.X return n, 3.X return nModified?
-
         if (numAffected>0)
         {
             done({result: 1, msg: numAffected+" record updated."});
