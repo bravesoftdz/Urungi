@@ -77,7 +77,7 @@ exports.UsersUpdate = function(req,res){
 exports.UsersDelete = function(req,res){
     req.query.trash = true;
 
-    controller.remove(req, function(result){
+    controller.delete(req, function(result){
         serverResponse(req, res, 200, result);
     });
 };
